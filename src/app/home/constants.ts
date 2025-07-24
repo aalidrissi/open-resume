@@ -95,7 +95,7 @@ export const START_HOME_RESUME: Resume = {
     deepClone(initialWorkExperience)
   ),
   educations: [deepClone(initialEducation)],
-  projects: [deepClone(initialProject)],
+  projects: [{ ...deepClone(initialProject), technologies: "" }],
   skills: {
     featuredSkills: END_HOME_RESUME.skills.featuredSkills.map((item) => ({
       skill: "",

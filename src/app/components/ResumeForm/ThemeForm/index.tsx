@@ -1,6 +1,6 @@
 import { BaseForm } from "components/ResumeForm/Form";
 import { InputGroupWrapper } from "components/ResumeForm/Form/InputGroup";
-import { THEME_COLORS } from "components/ResumeForm/ThemeForm/constants";
+import { DXC_MODES, DXC_PURPLE, DXC_GREEN } from "components/ResumeForm/ThemeForm/constants";
 import { InlineInput } from "components/ResumeForm/ThemeForm/InlineInput";
 import {
   DocumentSizeSelections,
@@ -9,8 +9,10 @@ import {
 } from "components/ResumeForm/ThemeForm/Selection";
 import {
   changeSettings,
+  changeDXCMode,
   DEFAULT_THEME_COLOR,
   selectSettings,
+  selectDXCMode,
   type GeneralSetting,
 } from "lib/redux/settingsSlice";
 import { useAppDispatch, useAppSelector } from "lib/redux/hooks";
@@ -19,6 +21,7 @@ import { Cog6ToothIcon } from "@heroicons/react/24/outline";
 
 export const ThemeForm = () => {
   const settings = useAppSelector(selectSettings);
+  const dxcMode = useAppSelector(selectDXCMode);
   const { fontSize, fontFamily, documentSize } = settings;
   const themeColor = settings.themeColor || DEFAULT_THEME_COLOR;
   const dispatch = useAppDispatch();
@@ -27,6 +30,9 @@ export const ThemeForm = () => {
     dispatch(changeSettings({ field, value }));
   };
 
+  const handleDXCModeChange = (mode: 'standard' | 'cdg') => {
+    dispatch(changeDXCMode(mode));
+  };
   return (
     <BaseForm>
       <div className="flex flex-col gap-6">
@@ -37,30 +43,48 @@ export const ThemeForm = () => {
           </h1>
         </div>
         <div>
-          <InlineInput
-            label="Theme Color"
-            name="themeColor"
-            value={settings.themeColor}
-            placeholder={DEFAULT_THEME_COLOR}
-            onChange={handleSettingsChange}
-            inputStyle={{ color: themeColor }}
-          />
-          <div className="mt-2 flex flex-wrap gap-2">
-            {THEME_COLORS.map((color, idx) => (
-              <div
-                className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-md text-sm text-white"
-                style={{ backgroundColor: color }}
-                key={idx}
-                onClick={() => handleSettingsChange("themeColor", color)}
-                onKeyDown={(e) => {
-                  if (["Enter", " "].includes(e.key))
-                    handleSettingsChange("themeColor", color);
-                }}
-                tabIndex={0}
-              >
-                {settings.themeColor === color ? "✓" : ""}
-              </div>
-            ))}
+          <InputGroupWrapper label="DXC Mode" />
+          <div className="mt-2 flex gap-4">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="dxcMode"
+                value="standard"
+                checked={dxcMode === 'standard'}
+                onChange={() => handleDXCModeChange('standard')}
+                className="h-4 w-4 text-purple-600 focus:ring-purple-500"
+              />
+              <span className="text-sm font-medium text-gray-700">
+                DXC Standard (Purple)
+              </span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="dxcMode"
+                value="cdg"
+                checked={dxcMode === 'cdg'}
+                onChange={() => handleDXCModeChange('cdg')}
+                className="h-4 w-4 text-green-600 focus:ring-green-500"
+              />
+              <span className="text-sm font-medium text-gray-700">
+                DXC CDG (Green)
+              </span>
+            </label>
+          </div>
+        </div>
+        <div>
+          <InputGroupWrapper label="Current Theme Color" />
+          <div className="mt-2 flex items-center gap-3">
+            <div
+              className="flex h-10 w-10 items-center justify-center rounded-md text-sm text-white"
+              style={{ backgroundColor: themeColor }}
+            >
+              ✓
+            </div>
+            <span className="text-sm text-gray-600">
+              Color is automatically set based on DXC mode selection
+            </span>
           </div>
         </div>
         <div>

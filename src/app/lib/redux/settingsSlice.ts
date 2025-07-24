@@ -3,6 +3,7 @@ import type { RootState } from "lib/redux/store";
 
 export interface Settings {
   themeColor: string;
+  dxcMode: 'standard' | 'cdg';
   fontFamily: string;
   fontSize: string;
   documentSize: string;
@@ -33,16 +34,19 @@ export type ShowForm = keyof Settings["formToShow"];
 export type FormWithBulletPoints = keyof Settings["showBulletPoints"];
 export type GeneralSetting = Exclude<
   keyof Settings,
-  "formToShow" | "formToHeading" | "formsOrder" | "showBulletPoints"
+  "formToShow" | "formToHeading" | "formsOrder" | "showBulletPoints" | "dxcMode"
 >;
 
 export const DEFAULT_THEME_COLOR = "#38bdf8"; // sky-400
+export const DXC_PURPLE = "#6B46C1"; // DXC Standard purple
+export const DXC_GREEN = "#059669"; // DXC CDG green
 export const DEFAULT_FONT_FAMILY = "Roboto";
 export const DEFAULT_FONT_SIZE = "11"; // text-base https://tailwindcss.com/docs/font-size
 export const DEFAULT_FONT_COLOR = "#171717"; // text-neutral-800
 
 export const initialSettings: Settings = {
-  themeColor: DEFAULT_THEME_COLOR,
+  themeColor: DXC_PURPLE,
+  dxcMode: 'standard',
   fontFamily: DEFAULT_FONT_FAMILY,
   fontSize: DEFAULT_FONT_SIZE,
   documentSize: "Letter",
@@ -121,6 +125,14 @@ export const settingsSlice = createSlice({
       const { field, value } = action.payload;
       draft["showBulletPoints"][field] = value;
     },
+    changeDXCMode: (
+      draft,
+      action: PayloadAction<'standard' | 'cdg'>
+    ) => {
+      draft.dxcMode = action.payload;
+      // Automatically update theme color based on mode
+      draft.themeColor = action.payload === 'standard' ? DXC_PURPLE : DXC_GREEN;
+    },
     setSettings: (draft, action: PayloadAction<Settings>) => {
       return action.payload;
     },
@@ -133,11 +145,13 @@ export const {
   changeFormHeading,
   changeFormOrder,
   changeShowBulletPoints,
+  changeDXCMode,
   setSettings,
 } = settingsSlice.actions;
 
 export const selectSettings = (state: RootState) => state.settings;
 export const selectThemeColor = (state: RootState) => state.settings.themeColor;
+export const selectDXCMode = (state: RootState) => state.settings.dxcMode;
 
 export const selectFormToShow = (state: RootState) => state.settings.formToShow;
 export const selectShowByForm = (form: ShowForm) => (state: RootState) =>

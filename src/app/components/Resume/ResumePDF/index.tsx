@@ -1,6 +1,7 @@
 import { Page, View, Document } from "@react-pdf/renderer";
 import { styles, spacing } from "components/Resume/ResumePDF/styles";
 import { ResumePDFProfile } from "components/Resume/ResumePDF/ResumePDFProfile";
+import { ResumePDFHeader } from "components/Resume/ResumePDF/ResumePDFHeader";
 import { ResumePDFWorkExperience } from "components/Resume/ResumePDF/ResumePDFWorkExperience";
 import { ResumePDFEducation } from "components/Resume/ResumePDF/ResumePDFEducation";
 import { ResumePDFProject } from "components/Resume/ResumePDF/ResumePDFProject";
@@ -42,6 +43,7 @@ export const ResumePDF = ({
     fontFamily,
     fontSize,
     documentSize,
+    dxcMode,
     formToHeading,
     formToShow,
     formsOrder,
@@ -92,6 +94,25 @@ export const ResumePDF = ({
     ),
   };
 
+  // Calculate content height to determine if we need multiple pages
+  const estimateContentHeight = () => {
+    let height = 0;
+    // Header height
+    height += 60;
+    // Profile section
+    height += 100;
+    // Each section estimate
+    showFormsOrder.forEach(() => {
+      height += 80; // Base section height
+    });
+    // Work experiences
+    height += workExperiences.length * 60;
+    // Education
+    height += educations.length * 50;
+    // Projects
+    height += projects.length * 50;
+    return height;
+  };
   return (
     <>
       <Document title={`${name} Resume`} author={name} producer={"OpenResume"}>
@@ -104,25 +125,24 @@ export const ResumePDF = ({
             fontSize: fontSize + "pt",
           }}
         >
-          {Boolean(settings.themeColor) && (
-            <View
-              style={{
-                width: spacing["full"],
-                height: spacing[3.5],
-                backgroundColor: themeColor,
-              }}
-            />
-          )}
           <View
             style={{
               ...styles.flexCol,
               padding: `${spacing[0]} ${spacing[20]}`,
             }}
           >
+            <ResumePDFHeader
+              dxcMode={dxcMode}
+              themeColor={themeColor}
+              showProfileInfo={true}
+              profile={profile}
+              isPDF={isPDF}
+            />
             <ResumePDFProfile
               profile={profile}
               themeColor={themeColor}
               isPDF={isPDF}
+              showHeader={true}
             />
             {showFormsOrder.map((form) => {
               const Component = formTypeToComponent[form];
@@ -130,8 +150,37 @@ export const ResumePDF = ({
             })}
           </View>
         </Page>
+        {/* Additional pages if needed */}
+        {needsMultiplePages && (
+          <Page
+            size={documentSize === "A4" ? "A4" : "LETTER"}
+            style={{
+              ...styles.flexCol,
+              color: DEFAULT_FONT_COLOR,
+              fontFamily,
+              fontSize: fontSize + "pt",
+            }}
+          >
+            <View
+              style={{
+                ...styles.flexCol,
+                padding: `${spacing[0]} ${spacing[20]}`,
+              }}
+            >
+              <ResumePDFHeader
+                dxcMode={dxcMode}
+                themeColor={themeColor}
+                showProfileInfo={false}
+                isPDF={isPDF}
+              />
+              {/* Additional content would go here if needed */}
+            </View>
+          </Page>
+        )}
       </Document>
       <SuppressResumePDFErrorMessage />
     </>
   );
 };
+
+  const needsMultiplePages = estimateContentHeight() > 700; // Approximate page height

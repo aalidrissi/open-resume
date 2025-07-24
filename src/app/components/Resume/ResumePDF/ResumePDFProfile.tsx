@@ -15,23 +15,31 @@ export const ResumePDFProfile = ({
   profile,
   themeColor,
   isPDF,
+  showHeader = false,
 }: {
   profile: ResumeProfile;
   themeColor: string;
   isPDF: boolean;
+  showHeader?: boolean;
 }) => {
   const { name, email, phone, url, summary, location } = profile;
   const iconProps = { email, phone, location, url };
 
+  // If header is shown separately, don't show name/email/phone here
+  const filteredIconProps = showHeader 
+    ? { location, url }
+    : iconProps;
   return (
     <ResumePDFSection style={{ marginTop: spacing["4"] }}>
-      <ResumePDFText
-        bold={true}
-        themeColor={themeColor}
-        style={{ fontSize: "20pt" }}
-      >
-        {name}
-      </ResumePDFText>
+      {!showHeader && (
+        <ResumePDFText
+          bold={true}
+          themeColor={themeColor}
+          style={{ fontSize: "20pt" }}
+        >
+          {name}
+        </ResumePDFText>
+      )}
       {summary && <ResumePDFText>{summary}</ResumePDFText>}
       <View
         style={{
@@ -40,7 +48,7 @@ export const ResumePDFProfile = ({
           marginTop: spacing["0.5"],
         }}
       >
-        {Object.entries(iconProps).map(([key, value]) => {
+        {Object.entries(filteredIconProps).map(([key, value]) => {
           if (!value) return null;
 
           let iconType = key as IconType;
@@ -52,7 +60,7 @@ export const ResumePDFProfile = ({
             }
           }
 
-          const shouldUseLinkWrapper = ["email", "url", "phone"].includes(key);
+          const shouldUseLinkWrapper = ["email", "url", "phone"].includes(key) && !showHeader;
           const Wrapper = ({ children }: { children: React.ReactNode }) => {
             if (!shouldUseLinkWrapper) return <>{children}</>;
 

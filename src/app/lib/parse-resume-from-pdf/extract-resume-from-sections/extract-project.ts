@@ -42,10 +42,12 @@ export const extractProject = (sections: ResumeSectionToLines) => {
       false
     );
 
+    // For now, set technologies as empty string since we can't parse it from PDF
+    const technologies = "";
     const descriptionsLines = subsectionLines.slice(descriptionsLineIdx);
     const descriptions = getBulletPointsFromLines(descriptionsLines);
 
-    projects.push({ project, date, descriptions });
+    projects.push({ project, date, technologies, descriptions });
     projectsScores.push({
       projectScores,
       dateScores,
